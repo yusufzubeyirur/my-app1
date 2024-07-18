@@ -1,27 +1,72 @@
-"use client"
+"use client";
 import { useState } from "react";
 
+const generateUUID = () => {
+  return crypto.randomUUID();
+};
+
 const ImageShow = () => {
-  const [image, setImage] = useState("");
-  const [isModalOpen,setIsModalOpen]=useState(false)
+  const [images, setImages] = useState([]);
+  const [iconSizes, setIconSizes] = useState({});
 
   const fetchImage = () => {
-    fetch('https://picsum.photos/200/300')
+    fetch("https://picsum.photos/200/300")
       .then((response) => {
-        setImage(response.url);
+        setImages((preImages) => [
+          ...preImages,
+          {
+            url: response.url,
+            id: generateUUID(),
+          },
+        ]);
       })
-      .catch((err) => console.error("hata", err));
+      .catch((err) => console.log("hata", err));
   };
-
-  const toggleModal = () => {
-    setIsModalOpen(!isModalOpen);
+  const selectImage = (imageId) => {
+    setIconSizes((preSizes) => ({
+      ...preSizes,
+      [imageId]: (preSizes[imageId] || 24) * 1.2,
+    }));
   };
-
   return (
     <>
-      <button onClick={fetchImage}>Resim Ekle <span>👍</span></button>
-      {image && <img src={image} alt="Random" />}
+      <button onClick={fetchImage}>
+        ResimEkle<span>👍</span>
+      </button>
+      {images.map((image) => (
+        <div
+          key={image.id}
+          style={{
+            position: "relative",
+            margin: "10px",
+            display: "inline-block",
+          }}
+        >
+          <img
+            key={image.id}
+            src={image.url}
+            alt={`Random ${image.id}`}
+            style={{
+              width: "200px",
+              height: "300px",
+              display: "block",
+            }}
+            onClick={() => selectImage(image.id)}
+          />
+          <span
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              fontSize: `${iconSizes[image.id] || 24}px`,
+              transition: "font-size 0.3s ease",
+            }}
+          >
+            👍
+          </span>
+        </div>
+      ))}
     </>
   );
-}
-export default ImageShow
+};
+export default ImageShow;
